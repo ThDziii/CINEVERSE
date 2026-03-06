@@ -9,3 +9,13 @@ body {
 	@apply bg-gray-50 text-gray-900;
 }
 */
+
+/* Global body tweaks for fixed navbar */
+body {
+	font-family: 'Crimson Pro', serif;
+	color: #E8E8F0;
+}
+
+/* small helper utilities that Tailwind won't synthesize with @apply */
+.logo-font { font-family: 'Bebas Neue', sans-serif; }
+.mono-font { font-family: 'JetBrains Mono', monospace; }

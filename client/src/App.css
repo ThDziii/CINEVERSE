@@ -1,42 +1,37 @@
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&display=swap');
+
+/* Design tokens / color palette */
+:root {
+  --c-crimson:       #C0152A;
+  --c-crimson-light: #E8203A;
+  --c-void:          #060608;
+  --c-charcoal:      #1A1A1F;
+  --c-ash:           #2A2A32;
+  --c-mist:          #6B6B7A;
+  --c-silver:        #A8A8B8;
+  --c-white:         #FAFAFA;
+
+  --f-display: 'Bebas Neue', sans-serif;
+  --f-mono:    'JetBrains Mono', monospace;
+}
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--c-void);
+  color: var(--c-white);
+  font-family: var(--f-mono);
+  padding-top: 68px; /* Height of fixed navbar */
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;
+  width: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
