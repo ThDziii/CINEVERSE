@@ -16,6 +16,50 @@ body {
 	color: #E8E8F0;
 }
 
+/* Hide scrollbar globally for scroll containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* small helper utilities that Tailwind won't synthesize with @apply */
 .logo-font { font-family: 'Bebas Neue', sans-serif; }
 .mono-font { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Custom scrollbar ── */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #C0152A transparent;
+}
+
+/* Chrome / Safari / Edge */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C0152A;
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E8203A;
+}
+
+/* Keep scroll containers (MovieRow, GenreTabs) still hidden */
+.scrollbar-hide {
+  scrollbar-width: none !important;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}

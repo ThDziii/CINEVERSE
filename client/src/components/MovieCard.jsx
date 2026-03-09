@@ -1,16 +1,48 @@
-const MovieCard = ({ movie }) => {
-  const posterUrl = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-  
+const MovieCard = ({ movie, onCardClick }) => {
+  const hasPoster = Boolean(movie.poster_path);
+  const posterUrl = hasPoster ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : null;
+  const title = movie.title || movie.name || 'Untitled';
+  const year = (movie.release_date || movie.first_air_date || '').slice(0, 4);
+  const rating = movie.vote_average?.toFixed(1) ?? null;
+
   return (
-    <div className="min-w-[160px] md:min-w-[200px] group cursor-pointer transition-transform duration-300 hover:scale-105">
-      <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg">
-        <img src={posterUrl} alt={movie.title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <button className="bg-white text-black p-2 rounded-full font-bold">▶</button>
+    <div className="movie-card" onClick={() => onCardClick?.(movie)}>
+      <div className="movie-card__poster">
+
+        {hasPoster ? (
+          <img src={posterUrl} alt={title} className="movie-card__img" loading="lazy" />
+        ) : (
+          <div className="movie-card__no-poster">
+            <span className="movie-card__no-poster-icon">🎬</span>
+            <span className="movie-card__no-poster-title">{title}</span>
+          </div>
+        )}
+
+        {rating && (
+          <div className="movie-card__rating">
+            <span className="movie-card__rating-star">★</span>
+            <span>{rating}</span>
+          </div>
+        )}
+
+        <div className="movie-card__vignette" />
+
+        <div className="movie-card__overlay">
+          <button className="movie-card__play-btn" aria-label={`Play ${title}`}>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="movie-card__info">
+          <p className="movie-card__info-title">{title}</p>
+          {year && <p className="movie-card__info-year">{year}</p>}
         </div>
       </div>
-      <h3 className="text-sm mt-2 font-medium truncate">{movie.title || movie.name}</h3>
-      <p className="text-xs text-yellow-400">⭐ {movie.vote_average?.toFixed(1)}</p>
+
+      <p className="movie-card__title">{title}</p>
+      {year && <p className="movie-card__year">{year}</p>}
     </div>
   );
 };
