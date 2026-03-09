@@ -8,7 +8,7 @@ import Footer from "../../components/Footer";
 import MovieModal from "../../components/MovieModal";
 import useMovieModal from "../../hooks/useMovieModal";
 
-const Home = () => {
+const Home = ({ onNavigate, user, onLogout, onLoginClick, watchlistCount, onWatchlistOpen, onToggleWatchlist, inWatchlist }) => {
   const [trending, setTrending] = useState([]);
   const API_URL = import.meta.env.VITE_API_BASE_URL;
   const { selectedMovie, openModal, closeModal } = useMovieModal();
@@ -23,9 +23,12 @@ const Home = () => {
     <div style={{ background: "var(--c-void)", minHeight: "100vh" }}>
       <Navbar
         activePage="home"
-        watchlistCount={0}
-        onNavigate={() => {}}
-        onWatchlistOpen={() => {}}
+        watchlistCount={watchlistCount ?? 0}
+        onNavigate={onNavigate ?? (() => {})}
+        onWatchlistOpen={onWatchlistOpen ?? (() => {})}
+        user={user}
+        onLogout={onLogout}
+        onLoginClick={onLoginClick}
       />
 
       <FeaturedHero
@@ -62,6 +65,8 @@ const Home = () => {
           movie={selectedMovie}
           onClose={closeModal}
           onWatchPlay={(movie) => console.log("Watch:", movie.title)}
+          inWatchlist={inWatchlist?.(selectedMovie?.id)}
+          onToggleWatchlist={onToggleWatchlist}
         />
       )}
     </div>

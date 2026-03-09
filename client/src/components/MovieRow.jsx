@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import MovieCard from "./MovieCard";
+import { SectionHeading } from "../ui/core";
 
 const MovieRow = ({ title, movies, onCardClick }) => {
   const rowRef = useRef(null);
@@ -12,18 +13,17 @@ const MovieRow = ({ title, movies, onCardClick }) => {
   return (
     <section className="movie-row">
       {/* Header */}
-      <div className="movie-row__header">
-        <div className="movie-row__title-group">
-          <span className="movie-row__accent-bar" />
-          <h2 className="movie-row__title">{title}</h2>
-        </div>
-        <button className="movie-row__see-all">
-          <span>Xem tất cả</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      <SectionHeading
+        title={title}
+        rightSlot={
+          <button className="movie-row__see-all">
+            <span>Xem tất cả</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        }
+      />
 
       {/* Scroll area */}
       <div className="movie-row__track-wrapper">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SectionHeading } from "../ui/core";
 
 const GENRE_MAP = {
   28: "Action",   12: "Adventure", 16: "Animation", 35: "Comedy",
@@ -22,32 +23,30 @@ const TrendingSection = ({ movies = [], onPlay, onCardClick }) => {
   const list = sorted.slice(0, 5);
 
   return (
-    <section className="trending-section">
+    <section id="trending" className="trending-section">
       {/* Header */}
       <div className="trending-section__header">
-        <div className="trending-section__title-group">
-          <span className="trending-section__accent-bar" />
-          <span className="trending-section__fire">🔥</span>
-          <h2 className="trending-section__title">Xu Hướng</h2>
-        </div>
-
-        {/* Filter tabs */}
-        <div className="trending-filters">
-          {FILTERS.map((f) => (
-            <button
-              key={f.id}
-              className={`trending-filter${activeFilter === f.id ? " trending-filter--active" : ""}`}
-              onClick={() => setActiveFilter(f.id)}
-            >
-              {f.label}
-              {activeFilter === f.id && (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              )}
-            </button>
-          ))}
-        </div>
+        <SectionHeading
+          title={<><span className="trending-section__fire">🔥</span> Xu Hướng</>}
+          rightSlot={
+            <div className="trending-filters">
+              {FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  className={`trending-filter${activeFilter === f.id ? " trending-filter--active" : ""}`}
+                  onClick={() => setActiveFilter(f.id)}
+                >
+                  {f.label}
+                  {activeFilter === f.id && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          }
+        />
       </div>
 
       {/* List */}

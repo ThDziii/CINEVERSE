@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { Badge, Button, Avatar } from "../ui/core";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const GENRE_MAP = {
   28: "Action",     12: "Adventure", 16: "Animation", 35: "Comedy",
@@ -16,10 +19,24 @@ const formatRuntime = (mins) => {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 };
 
-const MovieModal = ({ movie, onClose, onWatchPlay }) => {
+const MovieModal = ({ movie, onClose, onWatchPlay, inWatchlist: inWatchlistProp, onToggleWatchlist }) => {
   const overlayRef  = useRef(null);
-  const [inWatchlist, setInWatchlist] = useState(false);
-  const [imgError,    setImgError]    = useState(false);
+  // Use external state if provided, fallback to local state
+  const [localWatchlist, setLocalWatchlist] = useState(false);
+  const inWatchlist = inWatchlistProp ?? localWatchlist;
+  const handleToggleWatchlist = () => {
+    if (onToggleWatchlist) {
+      onToggleWatchlist(movie);
+    } else {
+      setLocalWatchlist((v) => !v);
+    }
+  };
+  const [imgError, setImgError] = useState(false);
+
+  // Cast & crew fetched from TMDB credits
+  const [cast,        setCast]        = useState([]);
+  const [director,    setDirector]    = useState(null);
+  const [loadingCast, setLoadingCast] = useState(true);
 
   const title      = movie.title || movie.name || "Untitled";
   const year       = (movie.release_date || movie.first_air_date || "").slice(0, 4);
@@ -41,7 +58,6 @@ const MovieModal = ({ movie, onClose, onWatchPlay }) => {
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
-    // Prevent body scroll
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
@@ -49,12 +65,25 @@ const MovieModal = ({ movie, onClose, onWatchPlay }) => {
     };
   }, [onClose]);
 
+  // Fetch cast + director from backend
+  useEffect(() => {
+    if (!movie?.id) return;
+    setLoadingCast(true);
+    fetch(`${API_URL}/api/movies/${movie.id}/credits`)
+      .then((r) => r.json())
+      .then((data) => {
+        setCast(data.cast?.slice(0, 8) ?? []);
+        const dir = data.crew?.find((c) => c.job === "Director");
+        setDirector(dir ?? null);
+      })
+      .catch(() => { setCast([]); setDirector(null); })
+      .finally(() => setLoadingCast(false));
+  }, [movie?.id]);
+
   // Click outside to close
   const handleOverlayClick = (e) => {
     if (e.target === overlayRef.current) onClose();
   };
-
-  const cast = movie.cast?.slice(0, 6) || [];
 
   return (
     <div
@@ -102,10 +131,10 @@ const MovieModal = ({ movie, onClose, onWatchPlay }) => {
                 <span className="modal__rating-max">/ 10</span>
               </span>
             )}
-            {genres && <span className="modal__badge modal__badge--genre">{genres.split(" / ")[0]}</span>}
-            {year   && <span className="modal__badge">{year}</span>}
-            {runtime && <span className="modal__badge">{runtime}</span>}
-            {genres && <span className="modal__badge">{genres}</span>}
+            {genres && <Badge variant="genre">{genres.split(" / ")[0]}</Badge>}
+            {year   && <Badge>{year}</Badge>}
+            {runtime && <Badge>{runtime}</Badge>}
+            {genres && <Badge>{genres}</Badge>}
           </div>
 
           {/* Overview */}
@@ -133,21 +162,38 @@ const MovieModal = ({ movie, onClose, onWatchPlay }) => {
             </div>
           </div>
 
+          {/* Director */}
+          {director && (
+            <div className="modal__director">
+              <span className="modal__section-label">Đạo diễn</span>
+              <span className="modal__director-name">{director.name}</span>
+            </div>
+          )}
+
           {/* Cast */}
-          {cast.length > 0 && (
-            <div className="modal__cast-section">
-              <p className="modal__section-label">Dàn diễn viên</p>
+          <div className="modal__cast-section">
+            <p className="modal__section-label">Dàn diễn viên</p>
+            {loadingCast ? (
+              <div className="modal__cast-skeleton">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="modal__cast-skel-item">
+                    <div className="modal__cast-skel-avatar" />
+                    <div className="modal__cast-skel-name" />
+                  </div>
+                ))}
+              </div>
+            ) : cast.length > 0 ? (
               <div className="modal__cast-list">
                 {cast.map((actor) => (
                   <div key={actor.id} className="modal__cast-item">
                     <div className="modal__cast-avatar">
                       {actor.profile_path ? (
                         <img
-                          src={`https://image.tmdb.org/t/p/w92${actor.profile_path}`}
+                          src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
                           alt={actor.name}
                         />
                       ) : (
-                        <span>👤</span>
+                        <Avatar name={actor.name} size="sm" />
                       )}
                     </div>
                     <p className="modal__cast-name">{actor.name}</p>
@@ -157,27 +203,33 @@ const MovieModal = ({ movie, onClose, onWatchPlay }) => {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="modal__cast-empty">Không có thông tin diễn viên.</p>
+            )}
+          </div>
         </div>
 
         {/* Bottom action bar */}
         <div className="modal__actions">
-          <button
-            className="modal__btn-play"
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => onWatchPlay?.(movie)}
+            leftIcon={
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            }
           >
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z" />
-            </svg>
             XEM PHIM
-          </button>
-          <button
-            className={`modal__btn-watchlist${inWatchlist ? " modal__btn-watchlist--active" : ""}`}
-            onClick={() => setInWatchlist((v) => !v)}
+          </Button>
+          <Button
+            variant={inWatchlist ? "outline" : "ghost"}
+            size="md"
+            onClick={handleToggleWatchlist}
           >
             {inWatchlist ? "✓ WATCHLIST" : "+ WATCHLIST"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

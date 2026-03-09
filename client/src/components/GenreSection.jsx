@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { SectionHeading } from "../ui/core";
 
 const GENRES = [
   { id: null,  label: "TẤT CẢ" },
@@ -69,10 +70,7 @@ const GenreSection = ({ title = "Thể Loại", movies = [], onPlay, onWatchlist
   return (
     <section className="genre-section">
       {/* Heading */}
-      <div className="genre-section__heading">
-        <span className="genre-section__accent-bar" />
-        <h2 className="genre-section__title">{title}</h2>
-      </div>
+      <SectionHeading title={title} />
 
       {/* Genre tabs */}
       <div className="genre-tabs">

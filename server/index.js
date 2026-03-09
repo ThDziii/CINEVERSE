@@ -27,6 +27,79 @@ app.get('/api/movies/popular', async (req, res) => {
     }
 });
 
+// Route tìm kiếm phim
+app.get('/api/movies/search', async (req, res) => {
+    const { query } = req.query;
+    if (!query) return res.json([]);
+    try {
+        const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
+            params: {
+                api_key: TMDB_KEY,
+                language: 'vi-VN',
+                query,
+                page: 1,
+                include_adult: false,
+            }
+        });
+        res.json(response.data.results);
+    } catch (error) {
+        console.error("Lỗi tìm kiếm TMDB:", error.message);
+        res.status(500).json({ error: "Lỗi kết nối server" });
+    }
+});
+
+// Route lấy phim theo thể loại
+app.get('/api/movies/genre', async (req, res) => {
+    const { genre_id } = req.query;
+    if (!genre_id) return res.json([]);
+    try {
+        const response = await axios.get('https://api.themoviedb.org/3/discover/movie', {
+            params: {
+                api_key: TMDB_KEY,
+                language: 'vi-VN',
+                with_genres: genre_id,
+                sort_by: 'popularity.desc',
+                page: 1,
+            }
+        });
+        res.json(response.data.results);
+    } catch (error) {
+        console.error("Lỗi lấy phim theo thể loại:", error.message);
+        res.status(500).json({ error: "Lỗi kết nối server" });
+    }
+});
+
+// Route lấy chi tiết phim (runtime, tagline, ...)
+app.get('/api/movies/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
+            params: { api_key: TMDB_KEY, language: 'vi-VN' }
+        });
+        res.json(response.data);
+    } catch (error) {
+        console.error("Lỗi lấy chi tiết phim:", error.message);
+        res.status(500).json({ error: "Lỗi kết nối server" });
+    }
+});
+
+// Route lấy diễn viên & đoàn làm phim
+app.get('/api/movies/:id/credits', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}/credits`, {
+            params: { api_key: TMDB_KEY, language: 'vi-VN' }
+        });
+        res.json({
+            cast: response.data.cast?.slice(0, 12) ?? [],
+            crew: response.data.crew ?? [],
+        });
+    } catch (error) {
+        console.error("Lỗi lấy credits:", error.message);
+        res.status(500).json({ error: "Lỗi kết nối server" });
+    }
+});
+
 // Try to listen on the desired port, and if it's already in use (common on macOS
 // where system services sometimes occupy low ports), fall back to PORT+1.
 const server = app.listen(PORT, () => {
