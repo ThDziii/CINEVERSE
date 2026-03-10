@@ -23,3 +23,12 @@ export interface LoginResponse {
 export interface RegisterResponse {
   msg: string;
 }
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  msg: string;
+}

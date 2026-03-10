@@ -38,3 +38,32 @@ exports.login = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+// Logic Đổi mật khẩu — PUT /api/auth/change-password (cần đăng nhập)
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword)
+            return res.status(400).json({ msg: "Vui lòng điền đầy đủ thông tin." });
+        if (newPassword.length < 6)
+            return res.status(400).json({ msg: "Mật khẩu mới phải có ít nhất 6 ký tự." });
+
+        const user = await User.findById(req.userId);
+        if (!user) return res.status(404).json({ msg: "Không tìm thấy người dùng." });
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) return res.status(400).json({ msg: "Mật khẩu hiện tại không đúng." });
+
+        if (currentPassword === newPassword)
+            return res.status(400).json({ msg: "Mật khẩu mới phải khác mật khẩu hiện tại." });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.json({ msg: "Đổi mật khẩu thành công!" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};

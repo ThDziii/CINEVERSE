@@ -1,7 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { authService } from "../../services/auth";
-import { LoginPayload, LoginResponse, RegisterPayload, RegisterResponse } from "../../types/auth";
+import {
+  LoginPayload, LoginResponse,
+  RegisterPayload, RegisterResponse,
+  ChangePasswordPayload, ChangePasswordResponse,
+} from "../../types/auth";
 
 
 //Register
@@ -38,3 +42,15 @@ export const useLogout = () => {
   };
   return { logout };
 };
+
+//Change Password
+export const useChangePassword = () =>
+  useMutation<ChangePasswordResponse, Error, ChangePasswordPayload>({
+    mutationFn: (payload) => authService.changePassword(payload),
+    onSuccess: (data) => {
+      toast.success(data.msg || "Đổi mật khẩu thành công!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Đổi mật khẩu thất bại.");
+    },
+  });

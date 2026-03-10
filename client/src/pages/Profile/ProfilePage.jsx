@@ -5,7 +5,9 @@ import { Avatar, Button, Input } from "../../ui/core";
 import {
   EditIcon, SaveIcon, BookmarkIcon, UserIcon,
   MailIcon, CalendarIcon, ShieldIcon, LogoutIcon,
+  EyeOpenIcon, EyeOffIcon,
 } from "../../ui/icon";
+import { useChangePassword } from "../../tanstack/hooks/auth";
 
 /* ── Stat Card ── */
 const StatCard = ({ icon, label, value, accent }) => (
@@ -44,6 +46,43 @@ const ProfilePage = ({
   const [displayName, setDisplayName] = useState(user?.username || user?.name || "");
   const [savedName, setSavedName]     = useState(user?.username || user?.name || "");
   const [saved, setSaved]             = useState(false);
+
+  // Đổi mật khẩu
+  const [pwOpen,      setPwOpen]      = useState(false);
+  const [currentPw,   setCurrentPw]   = useState("");
+  const [newPw,       setNewPw]       = useState("");
+  const [confirmPw,   setConfirmPw]   = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew,     setShowNew]     = useState(false);
+  const [pwFormError, setPwFormError] = useState("");
+  const changePassword = useChangePassword();
+
+  const handleChangePw = () => {
+    setPwFormError("");
+    if (!currentPw)             return setPwFormError("Vui lòng nhập mật khẩu hiện tại.");
+    if (!newPw)                 return setPwFormError("Vui lòng nhập mật khẩu mới.");
+    if (newPw.length < 6)       return setPwFormError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+    if (newPw !== confirmPw)    return setPwFormError("Mật khẩu xác nhận không khớp.");
+    if (newPw === currentPw)    return setPwFormError("Mật khẩu mới phải khác mật khẩu hiện tại.");
+
+    changePassword.mutate(
+      { currentPassword: currentPw, newPassword: newPw },
+      {
+        onSuccess: () => {
+          setPwOpen(false);
+          setCurrentPw(""); setNewPw(""); setConfirmPw("");
+          setPwFormError("");
+        },
+      }
+    );
+  };
+
+  const handleCancelPw = () => {
+    setPwOpen(false);
+    setCurrentPw(""); setNewPw(""); setConfirmPw("");
+    setPwFormError("");
+    changePassword.reset();
+  };
 
   const handleSave = () => {
     if (!displayName.trim()) return;
@@ -217,13 +256,77 @@ const ProfilePage = ({
                     <span className="profile-security__icon"><ShieldIcon /></span>
                     <div>
                       <p className="profile-security__name">Mật khẩu</p>
-                      <p className="profile-security__hint">Đổi mật khẩu tài khoản</p>
+                      <p className="profile-security__hint">
+                        {pwOpen ? "Nhập thông tin để đổi mật khẩu" : "Đổi mật khẩu tài khoản"}
+                      </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => onNavigate("/login")}>
-                    Đổi mật khẩu
-                  </Button>
+                  {!pwOpen && (
+                    <Button variant="outline" size="sm" onClick={() => setPwOpen(true)} leftIcon={<EditIcon />}>
+                      Đổi mật khẩu
+                    </Button>
+                  )}
                 </div>
+
+                {pwOpen && (
+                  <div className="profile-pw-form">
+                    <Input
+                      label="Mật khẩu hiện tại"
+                      type={showCurrent ? "text" : "password"}
+                      placeholder="Nhập mật khẩu hiện tại"
+                      value={currentPw}
+                      onChange={(e) => setCurrentPw(e.target.value)}
+                      autoComplete="current-password"
+                      rightSlot={
+                        <button type="button" className="login-eye-btn" onClick={() => setShowCurrent(v => !v)}>
+                          {showCurrent ? <EyeOffIcon /> : <EyeOpenIcon />}
+                        </button>
+                      }
+                    />
+                    <Input
+                      label="Mật khẩu mới"
+                      type={showNew ? "text" : "password"}
+                      placeholder="Tối thiểu 6 ký tự"
+                      value={newPw}
+                      onChange={(e) => setNewPw(e.target.value)}
+                      autoComplete="new-password"
+                      rightSlot={
+                        <button type="button" className="login-eye-btn" onClick={() => setShowNew(v => !v)}>
+                          {showNew ? <EyeOffIcon /> : <EyeOpenIcon />}
+                        </button>
+                      }
+                    />
+                    <Input
+                      label="Xác nhận mật khẩu mới"
+                      type={showNew ? "text" : "password"}
+                      placeholder="Nhập lại mật khẩu mới"
+                      value={confirmPw}
+                      onChange={(e) => setConfirmPw(e.target.value)}
+                      autoComplete="new-password"
+                    />
+
+                    {(pwFormError || changePassword.isError) && (
+                      <p className="profile-pw-form__error">
+                        {pwFormError || changePassword.error?.message}
+                      </p>
+                    )}
+
+                    <div className="profile-pw-form__actions">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleChangePw}
+                        disabled={changePassword.isPending}
+                        leftIcon={<SaveIcon />}
+                      >
+                        {changePassword.isPending ? "Đang lưu..." : "Lưu mật khẩu"}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={handleCancelPw}>
+                        Huỷ
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
 

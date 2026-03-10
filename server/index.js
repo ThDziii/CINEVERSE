@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const app = express();
 app.use(cors()); // Cho phép React gọi API
 app.use(express.json());
@@ -14,6 +15,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => console.error("Lỗi kết nối MongoDB:", err.message))
 
 app.use('/api/auth', authRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 const PORT = Number(process.env.PORT) || 5000;
 const TMDB_KEY = process.env.TMDB_API_KEY;
@@ -104,6 +106,40 @@ app.get('/api/movies/:id/credits', async (req, res) => {
         });
     } catch (error) {
         console.error("Lỗi lấy credits:", error.message);
+        res.status(500).json({ error: "Lỗi kết nối server" });
+    }
+});
+
+// Route lấy trailer YouTube
+app.get('/api/movies/:id/videos', async (req, res) => {
+    const { id } = req.params;
+    try {
+        // Thử tiếng Việt trước, nếu không có thì lấy tiếng Anh
+        let results = [];
+        const viRes = await axios.get(`https://api.themoviedb.org/3/movie/${id}/videos`, {
+            params: { api_key: TMDB_KEY, language: 'vi-VN' }
+        });
+        results = viRes.data.results ?? [];
+
+        if (results.length === 0) {
+            const enRes = await axios.get(`https://api.themoviedb.org/3/movie/${id}/videos`, {
+                params: { api_key: TMDB_KEY, language: 'en-US' }
+            });
+            results = enRes.data.results ?? [];
+        }
+
+        // Ưu tiên: Trailer chính thức → Teaser → bất kỳ video YouTube nào
+        const youtubeVideos = results.filter(v => v.site === 'YouTube');
+        const trailer =
+            youtubeVideos.find(v => v.type === 'Trailer' && v.official) ||
+            youtubeVideos.find(v => v.type === 'Trailer') ||
+            youtubeVideos.find(v => v.type === 'Teaser') ||
+            youtubeVideos[0] ||
+            null;
+
+        res.json({ key: trailer?.key ?? null, name: trailer?.name ?? null });
+    } catch (error) {
+        console.error("Lỗi lấy video:", error.message);
         res.status(500).json({ error: "Lỗi kết nối server" });
     }
 });

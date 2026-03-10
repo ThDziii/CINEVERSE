@@ -1,12 +1,9 @@
 /// <reference types="vite/client" />
 import {
-  RegisterResponse,
-  RegisterPayload,
-  LoginPayload,
-  LoginResponse,
-  ChangePasswordPayload,
-  ChangePasswordResponse,
-} from "../../types/auth";
+  GetReviewsResponse,
+  CreateReviewPayload,
+  CreateReviewResponse,
+} from "../../types/review";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
 
@@ -28,24 +25,19 @@ const request = async <T>(
   return data;
 };
 
-export const authService = {
-  register: (payload: RegisterPayload) =>
-    request<RegisterResponse>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+export const reviewService = {
+  // GET /api/reviews/:movieId — public
+  getByMovie: (movieId: number) =>
+    request<GetReviewsResponse>(`/api/reviews/${movieId}`),
 
-  login: (payload: LoginPayload) =>
-    request<LoginResponse>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
-  changePassword: (payload: ChangePasswordPayload) => {
+  // POST /api/reviews/:movieId — requires JWT
+  create: (movieId: number, payload: CreateReviewPayload) => {
     const token = localStorage.getItem("token");
-    return request<ChangePasswordResponse>("/api/auth/change-password", {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token ?? ""}` },
+    return request<CreateReviewResponse>(`/api/reviews/${movieId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token ?? ""}`,
+      },
       body: JSON.stringify(payload),
     });
   },

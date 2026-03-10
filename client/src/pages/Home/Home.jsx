@@ -66,6 +66,8 @@ const Home = ({ onNavigate, user, onLogout, onLoginClick, watchlistCount, onWatc
           onWatchPlay={(movie) => console.log("Watch:", movie.title)}
           inWatchlist={inWatchlist?.(selectedMovie?.id)}
           onToggleWatchlist={onToggleWatchlist}
+          user={user}
+          onLoginClick={onLoginClick}
         />
       )}
     </div>

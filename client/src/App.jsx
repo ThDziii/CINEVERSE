@@ -53,12 +53,14 @@ function App() {
       } />
 
       <Route path="/watchlist" element={
-        <WatchlistPage
-          {...navProps}
-          watchlist={watchlist}
-          onRemove={removeFromWatchlist}
-          onClear={clearWatchlist}
-        />
+        user
+          ? <WatchlistPage
+              {...navProps}
+              watchlist={watchlist}
+              onRemove={removeFromWatchlist}
+              onClear={clearWatchlist}
+            />
+          : <Navigate to="/login" replace />
       } />
 
       <Route path="/profile" element={

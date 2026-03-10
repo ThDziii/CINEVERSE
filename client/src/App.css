@@ -2593,7 +2593,9 @@ body {
   margin-bottom: 24px;
 }
 
+/* Thumbnail click-to-play */
 .modal__trailer {
+  position: relative;
   aspect-ratio: 16 / 9;
   background: var(--c-void);
   border: 1px solid var(--c-ash);
@@ -2602,12 +2604,60 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  cursor: pointer;
+  overflow: hidden;
   transition: border-color 0.2s ease;
 }
 
-.modal__trailer:hover {
+.modal__trailer--clickable {
+  cursor: pointer;
+}
+
+.modal__trailer--clickable:hover {
   border-color: var(--c-crimson);
+}
+
+.modal__trailer--no-video {
+  cursor: default;
+  opacity: .5;
+}
+
+.modal__trailer-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(.65);
+  transition: filter .25s ease;
+}
+
+.modal__trailer--clickable:hover .modal__trailer-thumb {
+  filter: brightness(.5);
+}
+
+.modal__trailer-overlay {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Actual YouTube iframe embed */
+.modal__trailer-embed {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.modal__trailer-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
 }
 
 .modal__trailer-play {
@@ -2642,7 +2692,13 @@ body {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 3px;
+  color: var(--c-white);
+  text-shadow: 0 1px 6px rgba(0,0,0,.8);
+}
+
+.modal__trailer-label--muted {
   color: var(--c-mist);
+  text-shadow: none;
 }
 
 /* Cast */
@@ -2890,6 +2946,276 @@ body {
   }
 }
 
+
+/* ══════════════════════════════════════
+   MODAL — REVIEW SECTION
+══════════════════════════════════════ */
+
+.modal__reviews {
+  padding: 24px 0 8px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  margin-top: 24px;
+}
+
+.modal__reviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.modal__reviews-scores {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.modal__score-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.modal__score-badge--tmdb {
+  background: rgba(255, 193, 7, .12);
+  border: 1px solid rgba(255, 193, 7, .3);
+  color: #ffc107;
+}
+
+.modal__score-badge--cv {
+  background: rgba(220, 38, 38, .12);
+  border: 1px solid rgba(220, 38, 38, .3);
+  color: #f87171;
+}
+
+.modal__score-star {
+  font-size: 13px;
+}
+
+.modal__score-value {
+  font-size: 14px;
+}
+
+.modal__score-source {
+  opacity: .75;
+  font-size: 10px;
+  letter-spacing: .5px;
+}
+
+/* Review form */
+.modal__review-form {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.modal__review-form-title {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 14px;
+}
+
+.modal__star-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.modal__star {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: rgba(255,255,255,.2);
+  cursor: pointer;
+  padding: 0 2px;
+  transition: color .15s ease, transform .1s ease;
+  line-height: 1;
+}
+
+.modal__star:hover,
+.modal__star--on {
+  color: #ffc107;
+  transform: scale(1.15);
+}
+
+.modal__star-value {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffc107;
+  margin-left: 8px;
+}
+
+.modal__review-textarea {
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  color: var(--c-white);
+  font-family: var(--f-sans);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 10px 14px;
+  resize: vertical;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+  transition: border-color .2s ease;
+}
+
+.modal__review-textarea::placeholder { color: rgba(255,255,255,.3); }
+
+.modal__review-textarea:focus {
+  outline: none;
+  border-color: var(--c-crimson);
+}
+
+.modal__review-error {
+  font-size: 12px;
+  color: #f87171;
+  margin-bottom: 10px;
+}
+
+/* Already reviewed */
+.modal__review-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(74, 222, 128, .1);
+  border: 1px solid rgba(74, 222, 128, .25);
+  border-radius: 8px;
+  color: #4ade80;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  margin-bottom: 24px;
+}
+
+.modal__review-done-icon {
+  font-size: 15px;
+}
+
+/* Login prompt */
+.modal__review-login-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: none;
+  border: 1px dashed rgba(255,255,255,.2);
+  border-radius: 8px;
+  color: rgba(255,255,255,.5);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  margin-bottom: 24px;
+  width: 100%;
+  justify-content: center;
+}
+
+.modal__review-login-prompt:hover {
+  border-color: var(--c-crimson);
+  color: var(--c-crimson);
+}
+
+/* Loading */
+.modal__reviews-loading {
+  color: rgba(255,255,255,.3);
+  font-size: 12px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* Reviews list */
+.modal__reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal__review-item {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.modal__review-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.modal__review-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modal__review-username {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--c-white);
+  letter-spacing: .5px;
+}
+
+.modal__review-date {
+  font-size: 11px;
+  color: rgba(255,255,255,.35);
+}
+
+.modal__review-stars {
+  color: #ffc107;
+  font-size: 13px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal__review-num {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,.5);
+}
+
+.modal__review-comment {
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.modal__reviews-empty {
+  font-size: 13px;
+  color: rgba(255,255,255,.3);
+  font-style: italic;
+  padding: 8px 0;
+}
 
 /* ══════════════════════════════════════
    UI CORE — PRIMITIVE COMPONENTS
@@ -3351,6 +3677,69 @@ body {
   color: var(--c-crimson-light);
 }
 
+/* ── Logout confirm panel (inside dropdown) ── */
+.user-dropdown__confirm {
+  padding: 12px 14px;
+}
+
+.user-dropdown__confirm-text {
+  font-size: 12px;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.user-dropdown__confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.user-dropdown__confirm-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: background .15s ease, opacity .15s ease;
+}
+
+.user-dropdown__confirm-btn--yes {
+  background: var(--c-crimson);
+  color: #fff;
+}
+.user-dropdown__confirm-btn--yes:hover { background: var(--c-crimson-light); }
+
+.user-dropdown__confirm-btn--no {
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.6);
+}
+.user-dropdown__confirm-btn--no:hover { background: rgba(255,255,255,.14); }
+
+/* ── Mobile logout confirm ── */
+.mobile-logout-confirm {
+  padding: 14px 16px;
+  background: rgba(255,255,255,.04);
+  border-radius: 8px;
+  margin: 4px 0;
+}
+
+.mobile-logout-confirm__text {
+  font-size: 12px;
+  color: rgba(255,255,255,.65);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.mobile-logout-confirm__actions {
+  display: flex;
+  gap: 8px;
+}
+
 
 /* ══════════════════════════════════════
    LOGIN PAGE STYLES
@@ -3652,7 +4041,7 @@ body {
   text-transform: uppercase;
 }
 
-/* Social buttons */
+/* Social buttons (kept for reference, buttons removed) */
 .login-social {
   display: flex;
   gap: 10px;
@@ -3680,6 +4069,16 @@ body {
 .login-social-btn:hover {
   border-color: var(--c-silver);
   color: var(--c-white);
+}
+
+/* Social note */
+.login-social-note {
+  text-align: center;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--c-mist);
+  padding: 6px 0 2px;
+  opacity: .6;
 }
 
 /* Note */
@@ -4633,6 +5032,28 @@ body {
   font-size: 10px;
   color: var(--c-mist);
   margin: 0;
+}
+
+/* Change password inline form */
+.profile-pw-form {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top: 0;
+}
+
+.profile-pw-form__error {
+  font-size: 12px;
+  color: #f87171;
+  margin: 0;
+}
+
+.profile-pw-form__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Danger zone */

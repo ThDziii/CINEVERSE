@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 import "../App.css";
 import { Button, Avatar } from "../ui/core";
 import { BookmarkIcon, LoginIcon, LogoutIcon, UserIcon, ChevronDown } from "../ui/icon";
@@ -80,13 +81,17 @@ function MobileItem({ link, isActive, onClick }) {
 /* ─── User Avatar Dropdown ─── */
 function UserMenu({ user, onLogout, onNavigate }) {
   const [open, setOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const ref = useRef(null);
 
   const displayName = user.username || user.name || user.email;
 
   useEffect(() => {
     const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+        setConfirmLogout(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -118,10 +123,39 @@ function UserMenu({ user, onLogout, onNavigate }) {
             Watchlist
           </button>
           <div className="user-dropdown__divider" />
-          <button className="user-dropdown__item user-dropdown__item--danger" onClick={() => { setOpen(false); onLogout(); }}>
-            <LogoutIcon size={14} />
-            Đăng xuất
-          </button>
+
+          {confirmLogout ? (
+            <div className="user-dropdown__confirm">
+              <p className="user-dropdown__confirm-text">Bạn chắc chắn muốn đăng xuất?</p>
+              <div className="user-dropdown__confirm-actions">
+                <button
+                  className="user-dropdown__confirm-btn user-dropdown__confirm-btn--yes"
+                  onClick={() => {
+                    setConfirmLogout(false);
+                    setOpen(false);
+                    toast.success("Đăng xuất thành công!");
+                    onLogout();
+                  }}
+                >
+                  Đăng xuất
+                </button>
+                <button
+                  className="user-dropdown__confirm-btn user-dropdown__confirm-btn--no"
+                  onClick={() => setConfirmLogout(false)}
+                >
+                  Huỷ
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              className="user-dropdown__item user-dropdown__item--danger"
+              onClick={() => setConfirmLogout(true)}
+            >
+              <LogoutIcon size={14} />
+              Đăng xuất
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -149,6 +183,7 @@ export default function Navbar({
   const [scrolled,   setScrolled]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile,   setIsMobile]   = useState(false);
+  const [mobileConfirmLogout, setMobileConfirmLogout] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -166,6 +201,11 @@ export default function Navbar({
   useEffect(() => {
     if (!isMobile) setMobileOpen(false);
   }, [isMobile]);
+
+  // Reset confirm state when mobile menu closes
+  useEffect(() => {
+    if (!mobileOpen) setMobileConfirmLogout(false);
+  }, [mobileOpen]);
 
   const handleNav = (path) => {
     if (path === "/#trending") {
@@ -277,14 +317,39 @@ export default function Navbar({
               {/* login / logout row */}
               <li className="mobile-watchlist-item">
                 {user ? (
-                  <button
-                    onClick={() => { onLogout(); setMobileOpen(false); }}
-                    className="mobile-watchlist-btn"
-                    style={{ color: "var(--c-crimson-light)" }}
-                  >
-                    <span className="mobile-menu-indicator" style={{ background: "var(--c-crimson)" }} />
-                    Đăng xuất ({user.username || user.email})
-                  </button>
+                  mobileConfirmLogout ? (
+                    <div className="mobile-logout-confirm">
+                      <p className="mobile-logout-confirm__text">Bạn chắc chắn muốn đăng xuất?</p>
+                      <div className="mobile-logout-confirm__actions">
+                        <button
+                          className="user-dropdown__confirm-btn user-dropdown__confirm-btn--yes"
+                          onClick={() => {
+                            setMobileConfirmLogout(false);
+                            setMobileOpen(false);
+                            toast.success("Đăng xuất thành công!");
+                            onLogout();
+                          }}
+                        >
+                          Đăng xuất
+                        </button>
+                        <button
+                          className="user-dropdown__confirm-btn user-dropdown__confirm-btn--no"
+                          onClick={() => setMobileConfirmLogout(false)}
+                        >
+                          Huỷ
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setMobileConfirmLogout(true)}
+                      className="mobile-watchlist-btn"
+                      style={{ color: "var(--c-crimson-light)" }}
+                    >
+                      <span className="mobile-menu-indicator" style={{ background: "var(--c-crimson)" }} />
+                      Đăng xuất ({user.username || user.email})
+                    </button>
+                  )
                 ) : (
                   <button
                     onClick={() => { onLoginClick(); setMobileOpen(false); }}

@@ -224,6 +224,8 @@ const WatchlistPage = ({
           movie={selectedMovie}
           onClose={closeModal}
           onWatchPlay={(movie) => console.log("Watch:", movie.title)}
+          user={user}
+          onLoginClick={onLoginClick}
         />
       )}
     </div>
