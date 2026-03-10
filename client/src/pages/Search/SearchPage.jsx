@@ -136,7 +136,6 @@ const SearchPage = ({ onNavigate, watchlistCount, onWatchlistOpen, user, onLogin
   return (
     <div className="search-page">
       <Navbar
-        activePage="search"
         watchlistCount={watchlistCount ?? 0}
         onNavigate={onNavigate}
         onWatchlistOpen={onWatchlistOpen}

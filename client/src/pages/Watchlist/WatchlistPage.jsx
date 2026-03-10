@@ -142,7 +142,6 @@ const WatchlistPage = ({
   return (
     <div className="wl-page">
       <Navbar
-        activePage="watchlist"
         watchlistCount={watchlistCount ?? watchlist.length}
         onNavigate={onNavigate}
         onWatchlistOpen={() => {}}

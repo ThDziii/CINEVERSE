@@ -16,5 +16,7 @@ export default defineConfig({
         secure: false,
       },
     },
+    // Redirect 404 → index.html for client-side routing
+    historyApiFallback: true,
   },
 })

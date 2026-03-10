@@ -1,70 +1,82 @@
-import { useState } from "react";
+import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import SearchPage from "./pages/Search/SearchPage";
 import LoginPage from "./pages/Login/LoginPage";
 import WatchlistPage from "./pages/Watchlist/WatchlistPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
 import useAuth from "./hooks/useAuth";
 import useWatchlist from "./hooks/useWatchlist";
 
 function App() {
-  const [activePage, setActivePage] = useState("home");
+  const navigate = useNavigate();
   const { user, login, logout } = useAuth();
-  const { watchlist, add: addToWatchlist, remove: removeFromWatchlist, toggle: toggleWatchlist, has: inWatchlist, clear: clearWatchlist } = useWatchlist();
+  const {
+    watchlist,
+    remove: removeFromWatchlist,
+    toggle: toggleWatchlist,
+    has: inWatchlist,
+    clear: clearWatchlist,
+  } = useWatchlist();
 
-  const handleLoginSuccess = async (credentials) => {
-    await login(credentials);
-    setActivePage("home");
+  const handleLoginSuccess = (data) => {
+    login(data);
+    navigate("/");
   };
 
-  const renderPage = () => {
-    switch (activePage) {
-      case "login":
-        return (
-          <LoginPage
-            onNavigate={setActivePage}
-            onLoginSuccess={handleLoginSuccess}
-          />
-        );
-      case "search":
-        return (
-          <SearchPage
-            onNavigate={setActivePage}
-            watchlistCount={watchlist.length}
-            onWatchlistOpen={() => setActivePage("watchlist")}
-            user={user}
-            onLoginClick={() => setActivePage("login")}
-          />
-        );
-      case "watchlist":
-        return (
-          <WatchlistPage
-            onNavigate={setActivePage}
-            watchlist={watchlist}
-            onRemove={removeFromWatchlist}
-            onClear={clearWatchlist}
-            watchlistCount={watchlist.length}
-            user={user}
-            onLogout={logout}
-            onLoginClick={() => setActivePage("login")}
-          />
-        );
-      default:
-        return (
-          <Home
-            onNavigate={setActivePage}
-            watchlistCount={watchlist.length}
-            onWatchlistOpen={() => setActivePage("watchlist")}
-            user={user}
-            onLogout={logout}
-            onLoginClick={() => setActivePage("login")}
-            onToggleWatchlist={toggleWatchlist}
-            inWatchlist={inWatchlist}
-          />
-        );
-    }
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
-  return <div className="App">{renderPage()}</div>;
+  // Shared props dùng lại ở nhiều trang
+  const navProps = {
+    watchlistCount: watchlist.length,
+    onWatchlistOpen: () => navigate("/watchlist"),
+    user,
+    onLogout: handleLogout,
+    onLoginClick: () => navigate("/login"),
+    onNavigate: navigate,
+  };
+
+  return (
+    <Routes>
+      <Route path="/" element={
+        <Home
+          {...navProps}
+          onToggleWatchlist={toggleWatchlist}
+          inWatchlist={inWatchlist}
+        />
+      } />
+
+      <Route path="/search" element={
+        <SearchPage {...navProps} />
+      } />
+
+      <Route path="/watchlist" element={
+        <WatchlistPage
+          {...navProps}
+          watchlist={watchlist}
+          onRemove={removeFromWatchlist}
+          onClear={clearWatchlist}
+        />
+      } />
+
+      <Route path="/profile" element={
+        user
+          ? <ProfilePage {...navProps} />
+          : <Navigate to="/login" replace />
+      } />
+
+      <Route path="/login" element={
+        user
+          ? <Navigate to="/" replace />
+          : <LoginPage onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />
+      } />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
 
 export default App;

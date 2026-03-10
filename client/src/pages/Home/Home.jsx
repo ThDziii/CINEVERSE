@@ -22,7 +22,6 @@ const Home = ({ onNavigate, user, onLogout, onLoginClick, watchlistCount, onWatc
   return (
     <div style={{ background: "var(--c-void)", minHeight: "100vh" }}>
       <Navbar
-        activePage="home"
         watchlistCount={watchlistCount ?? 0}
         onNavigate={onNavigate ?? (() => {})}
         onWatchlistOpen={onWatchlistOpen ?? (() => {})}

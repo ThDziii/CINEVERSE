@@ -1,34 +1,8 @@
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import { Button, Input, Divider } from "../../ui/core";
-
-const EyeOpenIcon = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
-const EyeOffIcon = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-    <line x1="1" y1="1" x2="23" y2="23" />
-  </svg>
-);
-
-const LoginIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-    <polyline points="10 17 15 12 10 7" />
-    <line x1="15" y1="12" x2="3" y2="12" />
-  </svg>
-);
-
-const AlertIcon = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-  </svg>
-);
+import { useRegister, useLogin } from "../../tanstack/hooks/auth";
+import { EyeOpenIcon, EyeOffIcon, LoginIcon, AlertIcon } from "../../ui/icon";
 
 const LoginPage = ({ onNavigate, onLoginSuccess }) => {
   const [tab,      setTab]      = useState("login");
@@ -36,12 +10,21 @@ const LoginPage = ({ onNavigate, onLoginSuccess }) => {
   const [password, setPassword] = useState("");
   const [confirm,  setConfirm]  = useState("");
   const [name,     setName]     = useState("");
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState("");
   const [showPwd,  setShowPwd]  = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const registerMutation = useRegister();
+  const loginMutation    = useLogin();
+
+  const loading  = registerMutation.isPending || loginMutation.isPending;
+  const apiError = registerMutation.error?.message || loginMutation.error?.message || "";
+  const error    = formError || apiError;
 
   const resetForm = () => {
-    setEmail(""); setPassword(""); setConfirm(""); setName(""); setError("");
+    setEmail(""); setPassword(""); setConfirm(""); setName("");
+    setFormError("");
+    registerMutation.reset();
+    loginMutation.reset();
   };
 
   const handleTabSwitch = (t) => { setTab(t); resetForm(); };
@@ -58,18 +41,28 @@ const LoginPage = ({ onNavigate, onLoginSuccess }) => {
     return null;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const err = validate();
-    if (err) { setError(err); return; }
-    setError("");
-    setLoading(true);
-    try {
-      await onLoginSuccess({ email, password, name, tab });
-    } catch (err) {
-      setError(err.message || "Đã có lỗi xảy ra.");
-    } finally {
-      setLoading(false);
+    if (err) { setFormError(err); return; }
+    setFormError("");
+
+    if (tab === "register") {
+      registerMutation.mutate(
+        { username: name, email, password },
+        {
+          onSuccess: () => {
+            // Toast đã hiển thị trong hook, chuyển sang tab đăng nhập
+            resetForm();
+            setTab("login");
+          },
+        }
+      );
+    } else {
+      loginMutation.mutate(
+        { email, password },
+        { onSuccess: (data) => onLoginSuccess(data) }
+      );
     }
   };
 
@@ -87,7 +80,7 @@ const LoginPage = ({ onNavigate, onLoginSuccess }) => {
 
   return (
     <div className="login-page">
-      <Navbar activePage="" onNavigate={onNavigate} watchlistCount={0} onWatchlistOpen={() => {}} />
+      <Navbar onNavigate={onNavigate} watchlistCount={0} onWatchlistOpen={() => {}} />
 
       <main className="login-main">
         <div className="login-bg">
